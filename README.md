@@ -84,6 +84,3 @@ Notes:
 
 ## Contributing
 This repository only contains CI workflow(s). If you want the workflow to trigger different configurations, please open an issue or PR with the desired changes. If you want me to add the README directly to this repository, tell me and I will create the commit.
-
-## License
-No license file is present in this repository. Add a LICENSE file if you want to make the repo contents explicitly reusable.
