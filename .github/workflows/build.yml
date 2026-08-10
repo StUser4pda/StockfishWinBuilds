@@ -22,8 +22,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - arch: x86-64-vnni512
           - arch: x86-64-avx2
           - arch: x86-64-avx512icl
+          - arch: x86-64-avx512
+          - arch: x86-64-bmi2
 
     steps:
       - name: Checkout official-stockfish/Stockfish
@@ -65,12 +68,14 @@ jobs:
           # Convert the Windows SDE path into an MSYS2-style path so the
           # MSYS2 shell can resolve it as RUN_PREFIX for profile-build.
           SDE_DIR=$(cygpath -u "${SDE_PATH}")
-          SDE_BIN="${SDE_DIR}/sde64.exe"
+          # On Windows, SDE ships a single sde.exe that transparently handles
+          # both 32- and 64-bit targets (sde64 is a Linux-only binary name).
+          SDE_BIN="${SDE_DIR}/sde.exe"
 
           # Sanity-check the binary actually exists at the resolved path
           # before handing it to make, so failures are obvious immediately.
           if [ ! -f "$SDE_BIN" ]; then
-            echo "::error::sde64.exe not found at $SDE_BIN"
+            echo "::error::sde.exe not found at $SDE_BIN"
             ls -la "$SDE_DIR"
             exit 1
           fi
