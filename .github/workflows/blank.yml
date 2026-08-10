@@ -1,0 +1,71 @@
+name: Build Stockfish — Windows x64
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: 'Commit to build. If empty - build current.'
+        required: false
+        default: ''   
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 1. PGO Generation ───────────────────────────────────────────────────────
+  prepare:
+    name: Prepare
+    runs-on: windows-latest
+    
+    steps:
+      - name: Set up MSYS2 CLANG64
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANG64
+          update: true
+          cache: true
+          install: >-
+            mingw-w64-clang-x86_64-toolchain
+            make
+
+  # ── 2. Per-architecture build ───────────────────────────────────────────────
+  build:
+    name: Windows x64 · ${{ matrix.arch }}
+    needs: prepare
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86-64-vnni512
+          - arch: x86-64-avx2
+          - arch: x86-64-avx512icl
+          - arch: x86-64-avx512
+          - arch: x86-64-bmi2
+
+    steps:
+      - name: Checkout official-stockfish/Stockfish
+        uses: actions/checkout@v4
+        with:
+          repository: official-stockfish/Stockfish
+          ref: ${{ inputs.commit }}
+          submodules: recursive
+
+      - name: Build ${{ matrix.arch }} binary
+        shell: msys2 {0}
+        run: |
+          make -j$(nproc) COMP=clang ARCH=${{ matrix.arch }}
+
+      - name: Strip debug symbols
+        shell: msys2 {0}
+        run: llvm-strip Stockfish.exe
+
+      - name: Upload artifact · ${{ matrix.arch }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Stockfish--windows-${{ matrix.arch }}
+          path: Stockfish.exe
+          if-no-files-found: error
+          retention-days: 30
