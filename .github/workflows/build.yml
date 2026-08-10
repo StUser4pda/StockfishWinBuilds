@@ -22,11 +22,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - arch: x86-64-vnni512
-          - arch: x86-64-avx2
+          - arch: x86-64-universal
           - arch: x86-64-avx512icl
+          - arch: x86-64-vnni512
           - arch: x86-64-avx512
+          - arch: x86-64-avxvnni
           - arch: x86-64-bmi2
+          - arch: x86-64-avx2
+          - arch: x86-64-sse41-popcnt
+          - arch: x86-64
 
     steps:
       - name: Checkout official-stockfish/Stockfish
