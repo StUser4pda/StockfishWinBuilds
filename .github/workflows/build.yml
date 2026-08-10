@@ -13,26 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── 1. PGO Generation ───────────────────────────────────────────────────────
-  prepare:
-    name: Prepare
-    runs-on: windows-latest
-    
-    steps:
-      - name: Set up MSYS2 CLANG64
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: CLANG64
-          update: true
-          cache: true
-          install: >-
-            mingw-w64-clang-x86_64-toolchain
-            make
-
-  # ── 2. Per-architecture build ───────────────────────────────────────────────
+  # ── Per-architecture build ───────────────────────────────────────────────
   build:
     name: Windows x64 · ${{ matrix.arch }}
-    needs: prepare
     runs-on: windows-latest
 
     strategy:
@@ -53,19 +36,38 @@ jobs:
           ref: ${{ inputs.commit }}
           submodules: recursive
 
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          DATE=$(git log -1 --format=%cd --date=format:%Y%m%d)
+          SHA=$(git rev-parse --short=8 HEAD)
+          echo "version=dev-${DATE}-${SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up MSYS2 CLANG64
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANG64
+          update: true
+          cache: true
+          install: >-
+            mingw-w64-clang-x86_64-toolchain
+            make
+
       - name: Build ${{ matrix.arch }} binary
         shell: msys2 {0}
         run: |
+          cd src
           make -j$(nproc) COMP=clang ARCH=${{ matrix.arch }}
 
       - name: Strip debug symbols
         shell: msys2 {0}
-        run: llvm-strip Stockfish.exe
+        run: llvm-strip src/Stockfish.exe
 
       - name: Upload artifact · ${{ matrix.arch }}
         uses: actions/upload-artifact@v4
         with:
-          name: Stockfish--windows-${{ matrix.arch }}
-          path: Stockfish.exe
+          name: Stockfish-${{ steps.version.outputs.version }}-windows-${{ matrix.arch }}
+          path: src/Stockfish.exe
           if-no-files-found: error
           retention-days: 30
