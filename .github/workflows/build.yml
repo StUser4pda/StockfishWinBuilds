@@ -57,6 +57,7 @@ jobs:
           install: >-
             mingw-w64-clang-x86_64-toolchain
             make
+            git
 
       - name: Set up Intel SDE
         uses: petarpetrovt/setup-sde@v6.0
