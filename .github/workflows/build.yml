@@ -1,4 +1,4 @@
-name: Build Stockfish — Windows x64
+name: Build Stockfish — CLANG Windows
 
 on:
   workflow_dispatch:
