@@ -54,11 +54,22 @@ jobs:
             mingw-w64-clang-x86_64-toolchain
             make
 
-      - name: Build ${{ matrix.arch }} binary
+      - name: Set up Intel SDE
+        uses: petarpetrovt/setup-sde@v6.0
+        with:
+          environmentVariableName: SDE_PATH
+
+      - name: Build ${{ matrix.arch }} binary (PGO)
         shell: msys2 {0}
+        env:
+          SDE_PATH: ${{ env.SDE_PATH }}
         run: |
           cd src
-          make -j$(nproc) COMP=clang ARCH=${{ matrix.arch }}
+          # Convert the Windows SDE path into an MSYS2-style path so the
+          # MSYS2 shell can resolve it as RUN_PREFIX for profile-build.
+          SDE_DIR=$(cygpath -u "${SDE_PATH}")
+          make -j$(nproc) COMP=clang ARCH=${{ matrix.arch }} profile-build \
+            RUN_PREFIX="${SDE_DIR}/sde64 -future --"
 
       - name: Strip debug symbols
         shell: msys2 {0}
