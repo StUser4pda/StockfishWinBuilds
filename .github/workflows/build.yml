@@ -90,7 +90,7 @@ jobs:
 
       - name: Strip debug symbols
         shell: msys2 {0}
-        run: llvm-strip src/Stockfish.exe
+        run: llvm-strip src/stockfish.exe
 
       - name: Upload artifact · ${{ matrix.arch }}
         uses: actions/upload-artifact@v4
