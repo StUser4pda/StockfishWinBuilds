@@ -33,10 +33,10 @@ jobs:
           #- arch: x86-64
 
     steps:
-      - name: Checkout official-stockfish/Stockfish
+      - name: Checkout official-stockfish/stockfish
         uses: actions/checkout@v4
         with:
-          repository: official-stockfish/Stockfish
+          repository: official-stockfish/stockfish
           ref: ${{ inputs.commit }}
           submodules: recursive
 
@@ -95,7 +95,7 @@ jobs:
       - name: Upload artifact · ${{ matrix.arch }}
         uses: actions/upload-artifact@v4
         with:
-          name: Stockfish-${{ steps.version.outputs.version }}-windows-${{ matrix.arch }}
-          path: src/Stockfish.exe
+          name: stockfish-${{ steps.version.outputs.version }}-windows-${{ matrix.arch }}
+          path: src/stockfish.exe
           if-no-files-found: error
           retention-days: 30
