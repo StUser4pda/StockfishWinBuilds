@@ -86,7 +86,7 @@ jobs:
             exit 1
           fi
 
-          make -j$(nproc) COMP=clang ARCH=${{ matrix.arch }} profile-build \
+          make -j$(nproc) COMP=clang ARCH=${{ matrix.arch }} SUPPORTED_ARCH=true profile-build \
             RUN_PREFIX="${SDE_BIN} -future --"
 
       - name: Strip debug symbols
